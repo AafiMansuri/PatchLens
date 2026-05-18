@@ -1,3 +1,5 @@
+"""Test Script to test the Github API and Groq API"""
+
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
