@@ -74,7 +74,8 @@ def fetch_pr_metadata(owner:str, repo:str, pr_number:int):
         "author": response["user"]["login"],
         "branches": branches,
         "desc": response["body"],
-        "state": response["state"]
+        "state": response["state"],
+        "head_sha": response["head"]["sha"]
     }
 
     return pr_metadata
@@ -115,3 +116,22 @@ def fetch_changed_files(owner:str, repo:str, pr_number:int):
         changed_files.append(changed_file)
     
     return changed_files
+
+def fetch_file_tree(owner:str, repo:str, tree_sha: str):
+    """
+    Fetch file tree of the repo and returns a list containing all file paths.
+
+    Args:
+        owner: name of the repo owner
+        repo: name of the repo
+        tree_sha: the SHA1 value of the tree
+
+    Returns:
+        list of file paths
+    """
+
+    url = f"{GITHUB_BASE_URL}/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1"
+
+    response = requests.get(url=url,headers=headers).json()
+
+    return [item["path"] for item in response["tree"] if item["type"] == "blob"]

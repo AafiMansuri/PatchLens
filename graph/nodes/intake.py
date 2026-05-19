@@ -1,7 +1,8 @@
 """Function of the intake node"""
 
+import os
 from graph.state import AgentState
-from tools.github_client import parse_url, fetch_pr_metadata, fetch_changed_files
+from tools.github_client import fetch_file_tree, parse_url, fetch_pr_metadata, fetch_changed_files
 
 def intake(state:AgentState) -> AgentState:
     """
@@ -24,23 +25,21 @@ def intake(state:AgentState) -> AgentState:
     owner, repo, pr_number = parse_url(pr_url)
     pr_metadata = fetch_pr_metadata(owner, repo, pr_number)
 
+
     if pr_metadata['state'] != 'open':
         raise ValueError(f"PR is not open, current state: {state}")
     
     changed_files = fetch_changed_files(owner,repo,pr_number)
+    files = fetch_file_tree(owner,repo,pr_metadata['head_sha'])
+    extensions = set(os.path.splitext(f["filename"])[1] for f in changed_files)
+    repo_files = [f for f in files if os.path.splitext(f)[1] in extensions]
     
-    state['owner'] = owner
-    state['repo'] = repo
-    state['pr_number'] = pr_number
-    state['pr_url'] = pr_url
-    state['pr_metadata'] = pr_metadata
-    state['changed_files'] = changed_files
-
     return {
         "owner": owner,
         "repo": repo,
         "pr_number": pr_number,
         "pr_url": pr_url,
         "pr_metadata": pr_metadata,
-        "changed_files": changed_files
+        "changed_files": changed_files,
+        "repo_files": repo_files
     }   
