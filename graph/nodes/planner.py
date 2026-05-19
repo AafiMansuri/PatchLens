@@ -1,6 +1,9 @@
 """Function of planner node"""
 
 import json
+
+from pydantic import BaseModel
+from graph.nodes.test import structured_llm
 from graph.state import AgentState
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -69,6 +72,14 @@ Schema:
 ]
 """
 
+class PlannerFile(BaseModel):
+  file_path: str
+  reasoning: str
+
+class PlannerOutput(BaseModel):
+  files: list[PlannerFile]
+
+
 def planner(state: AgentState) -> dict:
   """
   PLANNING node - LLM analyzes diffs and determines which additional
@@ -104,21 +115,15 @@ def planner(state: AgentState) -> dict:
   """
 
   llm = ChatGroq(model='llama-3.3-70b-versatile', temperature=0)
+  structured_llm = llm.with_structured_output(PlannerOutput)
 
   messages = [
     SystemMessage(content=system_prompt),
     HumanMessage(content=user_message)
   ]
 
-  response = llm.invoke(messages)
+  response = structured_llm.invoke(messages)
 
-  content = response.content.strip()
-  content = content.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-
-  try:
-    plan = json.loads(content)
-  except:
-    print("Failed to parse LLM response")
-    plan = []
+  plan = [file.model_dump() for file in response.files]
   
   return {"plan":plan}
