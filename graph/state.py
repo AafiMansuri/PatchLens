@@ -12,5 +12,6 @@ class AgentState(TypedDict):
     pr_metadata: dict           # {title, description, author, branches}
     changed_files: list[dict]   # [{filename, status, contents_url, patch}]
     fetched_files: dict         # {filename: content} - empty initially
-    plan: list[str]             # files the planner wants to fetch
-    review_comments: list[dict] # {file, line, severity, category, comment, suggested_fix} - empty initially
+    plan: list[dict]             # files the planner wants to fetch and their reasoning
+    review_comments: list[dict]  # {file, line, severity, category, comment, suggested_fix} - empty initially
+    repo_files: list[dict]            # all file paths
