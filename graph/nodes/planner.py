@@ -1,3 +1,5 @@
+"""Function of planner node"""
+
 import json
 from graph.state import AgentState
 from langchain_groq import ChatGroq
@@ -67,7 +69,17 @@ Schema:
 ]
 """
 
-def planner(state: AgentState):
+def planner(state: AgentState) -> dict:
+  """
+  PLANNING node - LLM analyzes diffs and determines which additional
+  files need to be fetched for a thorough review.
+
+  Args:
+      state: Current agent state containing pr_metadata, changed_files, and repo_files.
+
+  Returns:
+      Dict with plan - a list of dicts containing file_path and reasoning.
+  """
   pr_metadata = state['pr_metadata']
 
   repo_files = "\n".join(state['repo_files'])
