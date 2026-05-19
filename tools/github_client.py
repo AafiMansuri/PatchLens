@@ -2,6 +2,7 @@
 Github Client to interact with the Github API
 """
 
+import base64
 import re
 import requests
 import os
@@ -117,6 +118,7 @@ def fetch_changed_files(owner:str, repo:str, pr_number:int):
     
     return changed_files
 
+
 def fetch_file_tree(owner:str, repo:str, tree_sha: str):
     """
     Fetch file tree of the repo and returns a list containing all file paths.
@@ -132,6 +134,33 @@ def fetch_file_tree(owner:str, repo:str, tree_sha: str):
 
     url = f"{GITHUB_BASE_URL}/repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1"
 
-    response = requests.get(url=url,headers=headers).json()
+    response = requests.get(url=url, headers=headers).json()
 
     return [item["path"] for item in response["tree"] if item["type"] == "blob"]
+
+
+def fetch_file_content(owner:str, repo:str, path: str):
+    """
+    Fetch content of the file at the provided path in the repository.
+
+    Args:
+        owner: name of the repo owner
+        repo: name of the repo
+        path: path of the file
+
+    Returns:
+        content: decoded content of the file
+    """
+
+    url = f"{GITHUB_BASE_URL}/repos/{owner}/{repo}/contents/{path}"
+
+    response = requests.get(url=url, headers=headers)
+
+    if response.status_code != 200:
+        return None
+
+    data = response.json()
+
+    content = base64.b64decode(data["content"]).decode("utf-8")
+
+    return content
