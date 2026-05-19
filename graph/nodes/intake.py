@@ -34,16 +34,6 @@ def intake(state:AgentState) -> AgentState:
     extensions = set(os.path.splitext(f["filename"])[1] for f in changed_files)
     repo_files = [f for f in files if os.path.splitext(f)[1] in extensions]
     
-    state['owner'] = owner
-    state['repo'] = repo
-    state['pr_number'] = pr_number
-    state['pr_url'] = pr_url
-    state['pr_metadata'] = pr_metadata
-    state['changed_files'] = changed_files
-    state['repo_files'] = repo_files
-
-
-    
     return {
         "owner": owner,
         "repo": repo,
